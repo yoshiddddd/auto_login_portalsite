@@ -20,6 +20,8 @@ load_dotenv()
 username = os.getenv('IDNUMBER')
 password_value = os.getenv('PASSWORD')
 open_url = os.getenv('URL')
+sender = os.getenv('SENDER_EMAIL')
+
 def main():
     creds = None
     if os.path.exists('token.json'):
@@ -54,9 +56,13 @@ def main():
     except HttpError as error:
         print(f'An error occurred: {error}')
 
+import re
+from googleapiclient.errors import HttpError
+
 def read_latest_email(gmail_service):
     try:
-        results = gmail_service.users().messages().list(userId='me', labelIds=['INBOX'], maxResults=1).execute()
+        query = sender
+        results = gmail_service.users().messages().list(userId='me', q=query, labelIds=['INBOX'], maxResults=1).execute()
         messages = results.get('messages', [])
 
         if not messages:
@@ -65,13 +71,19 @@ def read_latest_email(gmail_service):
 
         message_id = messages[0]['id']
         message = gmail_service.users().messages().get(userId='me', id=message_id).execute()
-        number  = re.findall(r'\d+', message['snippet'])
-        # print('Message snippet: %s' % message['snippet'])
-        print('Message snippet: %s' % number[0])
-        return number[0]
+        number = re.findall(r'\d+', message['snippet'])
+        
+        if number:
+            print('Message snippet: %s' % number[0])
+            return number[0]
+        else:
+            print('No numbers found in the message snippet.')
+            return None
 
     except HttpError as error:
         print(f'An error occurred: {error}')
+        return None
+
 
 
 def auto_login(gmail_service):
