@@ -19,7 +19,7 @@ load_dotenv()
 
 username = os.getenv('IDNUMBER')
 password_value = os.getenv('PASSWORD')
-
+open_url = os.getenv('URL')
 def main():
     creds = None
     if os.path.exists('token.json'):
@@ -79,7 +79,7 @@ def auto_login(gmail_service):
         driver = webdriver.Chrome(service=webdriver_service)
 
         # 自動ログインしたいウェブサイトのURLをコピペ
-        driver.get('https://portal.seikei.ac.jp/campusweb/top.do') 
+        driver.get(open_url) 
 
         # ログインボタンをクリック
         login_button = driver.find_element(By.ID, 'loginButton')
